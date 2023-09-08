@@ -20,11 +20,6 @@ var _ = reflect.TypeOf
 var _ = strconv.Atoi
 var _ = time.UTC
 
-func convertRecordInterfaceToGo(context string, input interface{}) (recordInterface RecordInterface, err error) {
-	recordInterface = input
-	return
-}
-
 func convertBondRefToBondRecordMapToGo(context string, input interface{}) (goMap map[BondRef]BondRecord, err error) {
 	xenMap, ok := input.(xmlrpc.Struct)
 	if !ok {
@@ -2108,6 +2103,11 @@ func convertTunnelRefToTunnelRecordMapToGo(context string, input interface{}) (g
 		}
 		goMap[goKey] = goValue
 	}
+	return
+}
+
+func convertRecordInterfaceToGo(context string, input interface{}) (recordInterface RecordInterface, err error) {
+	recordInterface = input
 	return
 }
 
@@ -9364,6 +9364,24 @@ func convertEnumIpv6ConfigurationModeToXen(context string, value Ipv6Configurati
 	return string(value), nil
 }
 
+func convertEnumLatestSyncedUpdatesAppliedStateToGo(context string, input interface{}) (value LatestSyncedUpdatesAppliedState, err error) {
+	strValue, err := convertStringToGo(context, input)
+	if err != nil {
+		return
+	}
+  	switch strValue {
+    case "yes":
+      value = LatestSyncedUpdatesAppliedStateYes
+    case "no":
+      value = LatestSyncedUpdatesAppliedStateNo
+    case "unknown":
+      value = LatestSyncedUpdatesAppliedStateUnknown
+    default:
+      err = fmt.Errorf("Unable to parse XenAPI response: got value %q for enum %s at %s, but this is not any of the known values", strValue, "LatestSyncedUpdatesAppliedState", context)
+	}
+	return
+}
+
 func convertEnumLivepatchStatusToGo(context string, input interface{}) (value LivepatchStatus, err error) {
 	strValue, err := convertStringToGo(context, input)
 	if err != nil {
@@ -10076,6 +10094,26 @@ func convertEnumUpdateGuidancesToGo(context string, input interface{}) (value Up
 }
 
 func convertEnumUpdateGuidancesToXen(context string, value UpdateGuidances) (string, error) {
+	return string(value), nil
+}
+
+func convertEnumUpdateSyncFrequencyToGo(context string, input interface{}) (value UpdateSyncFrequency, err error) {
+	strValue, err := convertStringToGo(context, input)
+	if err != nil {
+		return
+	}
+  	switch strValue {
+    case "daily":
+      value = UpdateSyncFrequencyDaily
+    case "weekly":
+      value = UpdateSyncFrequencyWeekly
+    default:
+      err = fmt.Errorf("Unable to parse XenAPI response: got value %q for enum %s at %s, but this is not any of the known values", strValue, "UpdateSyncFrequency", context)
+	}
+	return
+}
+
+func convertEnumUpdateSyncFrequencyToXen(context string, value UpdateSyncFrequency) (string, error) {
 	return string(value), nil
 }
 
@@ -11418,6 +11456,13 @@ func convertHostRecordToGo(context string, input interface{}) (record HostRecord
 			return
 		}
 	}
+	latestSyncedUpdatesAppliedValue, ok := rpcStruct["latest_synced_updates_applied"]
+	if ok && latestSyncedUpdatesAppliedValue != nil {
+  	record.LatestSyncedUpdatesApplied, err = convertEnumLatestSyncedUpdatesAppliedStateToGo(fmt.Sprintf("%s.%s", context, "latest_synced_updates_applied"), latestSyncedUpdatesAppliedValue)
+		if err != nil {
+			return
+		}
+	}
 	return
 }
 
@@ -12653,6 +12698,34 @@ func convertPoolRecordToGo(context string, input interface{}) (record PoolRecord
 	telemetryNextCollectionValue, ok := rpcStruct["telemetry_next_collection"]
 	if ok && telemetryNextCollectionValue != nil {
   	record.TelemetryNextCollection, err = convertTimeToGo(fmt.Sprintf("%s.%s", context, "telemetry_next_collection"), telemetryNextCollectionValue)
+		if err != nil {
+			return
+		}
+	}
+	lastUpdateSyncValue, ok := rpcStruct["last_update_sync"]
+	if ok && lastUpdateSyncValue != nil {
+  	record.LastUpdateSync, err = convertTimeToGo(fmt.Sprintf("%s.%s", context, "last_update_sync"), lastUpdateSyncValue)
+		if err != nil {
+			return
+		}
+	}
+	updateSyncFrequencyValue, ok := rpcStruct["update_sync_frequency"]
+	if ok && updateSyncFrequencyValue != nil {
+  	record.UpdateSyncFrequency, err = convertEnumUpdateSyncFrequencyToGo(fmt.Sprintf("%s.%s", context, "update_sync_frequency"), updateSyncFrequencyValue)
+		if err != nil {
+			return
+		}
+	}
+	updateSyncDayValue, ok := rpcStruct["update_sync_day"]
+	if ok && updateSyncDayValue != nil {
+  	record.UpdateSyncDay, err = convertIntToGo(fmt.Sprintf("%s.%s", context, "update_sync_day"), updateSyncDayValue)
+		if err != nil {
+			return
+		}
+	}
+	updateSyncEnabledValue, ok := rpcStruct["update_sync_enabled"]
+	if ok && updateSyncEnabledValue != nil {
+  	record.UpdateSyncEnabled, err = convertBoolToGo(fmt.Sprintf("%s.%s", context, "update_sync_enabled"), updateSyncEnabledValue)
 		if err != nil {
 			return
 		}

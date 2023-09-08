@@ -43,6 +43,17 @@ const (
 	HostAllowedOperationsApplyUpdates HostAllowedOperations = "apply_updates"
 )
 
+type LatestSyncedUpdatesAppliedState string
+
+const (
+	// The host is up to date with the latest updates synced from remote CDN
+	LatestSyncedUpdatesAppliedStateYes LatestSyncedUpdatesAppliedState = "yes"
+	// The host is outdated with the latest updates synced from remote CDN
+	LatestSyncedUpdatesAppliedStateNo LatestSyncedUpdatesAppliedState = "no"
+	// If the host is up to date with the latest updates synced from remote CDN is unknown
+	LatestSyncedUpdatesAppliedStateUnknown LatestSyncedUpdatesAppliedState = "unknown"
+)
+
 type HostDisplay string
 
 const (
@@ -198,6 +209,8 @@ type HostRecord struct {
 	LastSoftwareUpdate time.Time
 	// Reflects whether port 80 is open (false) or not (true)
 	HTTPSOnly bool
+	// Default as 'unknown', 'yes' if the host is up to date with updates synced from remote CDN, otherwise 'no'
+	LatestSyncedUpdatesApplied LatestSyncedUpdatesAppliedState
 }
 
 type HostRef string
@@ -234,6 +247,21 @@ func (_class HostClass) GetAll(sessionID SessionRef) (_retval []HostRef, _err er
 		return
 	}
 	_retval, _err = convertHostRefSetToGo(_method + " -> ", _result.Value)
+	return
+}
+
+// ApplyRecommendedGuidances apply all recommended guidances both on the host and on all HVM VMs on the host after updates are applied on the host
+func (_class HostClass) ApplyRecommendedGuidances(sessionID SessionRef, self HostRef) (_err error) {
+	_method := "host.apply_recommended_guidances"
+	_sessionIDArg, _err := convertSessionRefToXen(fmt.Sprintf("%s(%s)", _method, "session_id"), sessionID)
+	if _err != nil {
+		return
+	}
+	_selfArg, _err := convertHostRefToXen(fmt.Sprintf("%s(%s)", _method, "self"), self)
+	if _err != nil {
+		return
+	}
+	_, _err =  _class.client.APICall(_method, _sessionIDArg, _selfArg)
 	return
 }
 
@@ -1997,6 +2025,25 @@ func (_class HostClass) SetNameLabel(sessionID SessionRef, self HostRef, value s
 		return
 	}
 	_, _err =  _class.client.APICall(_method, _sessionIDArg, _selfArg, _valueArg)
+	return
+}
+
+// GetLatestSyncedUpdatesApplied Get the latest_synced_updates_applied field of the given host.
+func (_class HostClass) GetLatestSyncedUpdatesApplied(sessionID SessionRef, self HostRef) (_retval LatestSyncedUpdatesAppliedState, _err error) {
+	_method := "host.get_latest_synced_updates_applied"
+	_sessionIDArg, _err := convertSessionRefToXen(fmt.Sprintf("%s(%s)", _method, "session_id"), sessionID)
+	if _err != nil {
+		return
+	}
+	_selfArg, _err := convertHostRefToXen(fmt.Sprintf("%s(%s)", _method, "self"), self)
+	if _err != nil {
+		return
+	}
+	_result, _err := _class.client.APICall(_method, _sessionIDArg, _selfArg)
+	if _err != nil {
+		return
+	}
+	_retval, _err = convertEnumLatestSyncedUpdatesAppliedStateToGo(_method + " -> ", _result.Value)
 	return
 }
 

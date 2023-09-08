@@ -62,6 +62,15 @@ const (
 	TelemetryFrequencyMonthly TelemetryFrequency = "monthly"
 )
 
+type UpdateSyncFrequency string
+
+const (
+	// The update synchronizations happen every day
+	UpdateSyncFrequencyDaily UpdateSyncFrequency = "daily"
+	// The update synchronizations happen every week on the chosen day
+	UpdateSyncFrequencyWeekly UpdateSyncFrequency = "weekly"
+)
+
 type PoolRecord struct {
 	// Unique identifier/object reference
 	UUID string
@@ -163,6 +172,14 @@ type PoolRecord struct {
 	TelemetryFrequency TelemetryFrequency
 	// The earliest timestamp (in UTC) when the next round of telemetry collection can be carried out
 	TelemetryNextCollection time.Time
+	// time of the last update sychronization
+	LastUpdateSync time.Time
+	// The frequency at which updates are synchronized from a remote CDN: daily or weekly.
+	UpdateSyncFrequency UpdateSyncFrequency
+	// The day of the week the update synchronizations will be scheduled, based on pool's local timezone. Ignored when update_sync_frequency is daily
+	UpdateSyncDay int
+	// Whether periodic update synchronization is enabled or not
+	UpdateSyncEnabled bool
 }
 
 type PoolRef string
@@ -199,6 +216,48 @@ func (_class PoolClass) GetAll(sessionID SessionRef) (_retval []PoolRef, _err er
 		return
 	}
 	_retval, _err = convertPoolRefSetToGo(_method + " -> ", _result.Value)
+	return
+}
+
+// SetUpdateSyncEnabled enable or disable periodic update synchronization depending on the value
+func (_class PoolClass) SetUpdateSyncEnabled(sessionID SessionRef, self PoolRef, value bool) (_err error) {
+	_method := "pool.set_update_sync_enabled"
+	_sessionIDArg, _err := convertSessionRefToXen(fmt.Sprintf("%s(%s)", _method, "session_id"), sessionID)
+	if _err != nil {
+		return
+	}
+	_selfArg, _err := convertPoolRefToXen(fmt.Sprintf("%s(%s)", _method, "self"), self)
+	if _err != nil {
+		return
+	}
+	_valueArg, _err := convertBoolToXen(fmt.Sprintf("%s(%s)", _method, "value"), value)
+	if _err != nil {
+		return
+	}
+	_, _err =  _class.client.APICall(_method, _sessionIDArg, _selfArg, _valueArg)
+	return
+}
+
+// ConfigureUpdateSync Configure periodic update synchronization to sync updates from a remote CDN
+func (_class PoolClass) ConfigureUpdateSync(sessionID SessionRef, self PoolRef, updateSyncFrequency UpdateSyncFrequency, updateSyncDay int) (_err error) {
+	_method := "pool.configure_update_sync"
+	_sessionIDArg, _err := convertSessionRefToXen(fmt.Sprintf("%s(%s)", _method, "session_id"), sessionID)
+	if _err != nil {
+		return
+	}
+	_selfArg, _err := convertPoolRefToXen(fmt.Sprintf("%s(%s)", _method, "self"), self)
+	if _err != nil {
+		return
+	}
+	_updateSyncFrequencyArg, _err := convertEnumUpdateSyncFrequencyToXen(fmt.Sprintf("%s(%s)", _method, "update_sync_frequency"), updateSyncFrequency)
+	if _err != nil {
+		return
+	}
+	_updateSyncDayArg, _err := convertIntToXen(fmt.Sprintf("%s(%s)", _method, "update_sync_day"), updateSyncDay)
+	if _err != nil {
+		return
+	}
+	_, _err =  _class.client.APICall(_method, _sessionIDArg, _selfArg, _updateSyncFrequencyArg, _updateSyncDayArg)
 	return
 }
 
@@ -1923,6 +1982,82 @@ func (_class PoolClass) SetNameLabel(sessionID SessionRef, self PoolRef, value s
 		return
 	}
 	_, _err =  _class.client.APICall(_method, _sessionIDArg, _selfArg, _valueArg)
+	return
+}
+
+// GetUpdateSyncEnabled Get the update_sync_enabled field of the given pool.
+func (_class PoolClass) GetUpdateSyncEnabled(sessionID SessionRef, self PoolRef) (_retval bool, _err error) {
+	_method := "pool.get_update_sync_enabled"
+	_sessionIDArg, _err := convertSessionRefToXen(fmt.Sprintf("%s(%s)", _method, "session_id"), sessionID)
+	if _err != nil {
+		return
+	}
+	_selfArg, _err := convertPoolRefToXen(fmt.Sprintf("%s(%s)", _method, "self"), self)
+	if _err != nil {
+		return
+	}
+	_result, _err := _class.client.APICall(_method, _sessionIDArg, _selfArg)
+	if _err != nil {
+		return
+	}
+	_retval, _err = convertBoolToGo(_method + " -> ", _result.Value)
+	return
+}
+
+// GetUpdateSyncDay Get the update_sync_day field of the given pool.
+func (_class PoolClass) GetUpdateSyncDay(sessionID SessionRef, self PoolRef) (_retval int, _err error) {
+	_method := "pool.get_update_sync_day"
+	_sessionIDArg, _err := convertSessionRefToXen(fmt.Sprintf("%s(%s)", _method, "session_id"), sessionID)
+	if _err != nil {
+		return
+	}
+	_selfArg, _err := convertPoolRefToXen(fmt.Sprintf("%s(%s)", _method, "self"), self)
+	if _err != nil {
+		return
+	}
+	_result, _err := _class.client.APICall(_method, _sessionIDArg, _selfArg)
+	if _err != nil {
+		return
+	}
+	_retval, _err = convertIntToGo(_method + " -> ", _result.Value)
+	return
+}
+
+// GetUpdateSyncFrequency Get the update_sync_frequency field of the given pool.
+func (_class PoolClass) GetUpdateSyncFrequency(sessionID SessionRef, self PoolRef) (_retval UpdateSyncFrequency, _err error) {
+	_method := "pool.get_update_sync_frequency"
+	_sessionIDArg, _err := convertSessionRefToXen(fmt.Sprintf("%s(%s)", _method, "session_id"), sessionID)
+	if _err != nil {
+		return
+	}
+	_selfArg, _err := convertPoolRefToXen(fmt.Sprintf("%s(%s)", _method, "self"), self)
+	if _err != nil {
+		return
+	}
+	_result, _err := _class.client.APICall(_method, _sessionIDArg, _selfArg)
+	if _err != nil {
+		return
+	}
+	_retval, _err = convertEnumUpdateSyncFrequencyToGo(_method + " -> ", _result.Value)
+	return
+}
+
+// GetLastUpdateSync Get the last_update_sync field of the given pool.
+func (_class PoolClass) GetLastUpdateSync(sessionID SessionRef, self PoolRef) (_retval time.Time, _err error) {
+	_method := "pool.get_last_update_sync"
+	_sessionIDArg, _err := convertSessionRefToXen(fmt.Sprintf("%s(%s)", _method, "session_id"), sessionID)
+	if _err != nil {
+		return
+	}
+	_selfArg, _err := convertPoolRefToXen(fmt.Sprintf("%s(%s)", _method, "self"), self)
+	if _err != nil {
+		return
+	}
+	_result, _err := _class.client.APICall(_method, _sessionIDArg, _selfArg)
+	if _err != nil {
+		return
+	}
+	_retval, _err = convertTimeToGo(_method + " -> ", _result.Value)
 	return
 }
 

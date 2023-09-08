@@ -21,8 +21,8 @@ import (
 var (
 	reXenRefType             = regexp.MustCompile("^(.+?) ref$")
 	reXenSetType             = regexp.MustCompile("^(.+?) set$")
-	reXenRecordType          = regexp.MustCompile("^(.+?) record$")
-	reXenRecordInterfaceType = regexp.MustCompile("^&lt;object record&gt;$")
+	reXenRecordType          = regexp.MustCompile("^([^\\<]+?) record$")
+	reXenRecordInterfaceType = regexp.MustCompile("^\\<class\\> record$")
 	reXenEnumType            = regexp.MustCompile("^enum (.+)$")
 	reXenMapType             = regexp.MustCompile("^\\((.+?) -> (.+?)\\) map$")
 	reXenBatchType           = regexp.MustCompile("^an (.+?) batch$")
