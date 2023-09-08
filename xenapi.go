@@ -475,7 +475,7 @@ func {{ .FuncName }}(context string, input interface{}) (record {{ .GoType }}, e
 		if err != nil {
 			return
 		}
-		}{{ end }}
+	}{{ end }}
 	return
 }
 `
