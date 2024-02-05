@@ -1,4 +1,4 @@
-module github.com/sarah-soo/go-xen-api-client/test-dir
+module github.com/Shiakaron/go-xen-api-client/test-dir
 
 go 1.21.6
 
